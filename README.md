@@ -116,6 +116,17 @@ Questions:
   
   But, since currently invoices do not include any date, I omit this part of the functionality.
   In the real system I'd argue it is necessary.
+- After a payment is done, we need to store the status of an invoice and that is big exclamation mark.
+  
+  If we save invoice and then call API and fail, then an invoice is marked as paid, but actually is not.
+  I believe this is not an option.
+  
+  If we call API and then save invoice and fail, then an invoice is paid, but is not marked as paid and
+  will be reprocessed in the next billing cycle.
+  Here we need either a distributed transaction (external API has to support it) or be sure that external API is
+  idempotent (allows multiple submissions of the same invoice). Either of solutions requires support from the API.
+  
+  Since this is test project I assume the external API is idempotent and just will save the results.
 
 ### Questions outside of scope of the task
 
@@ -124,3 +135,4 @@ These parts are missing from the implementation and might be necessary depending
 - Metrics
 - PaymentProvider implementation
 - Invoice datetime
+- External API (using either distributed transaction or making sure it's idempotent)
