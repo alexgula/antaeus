@@ -94,6 +94,9 @@ Then we have to think about:
 - Configuration for different environments - provide endpoint as parameter and read it from environment variable
   like in 12-factor apps (and like in Tinjis project).
 
+Ugh, found a comment on top of PaymentProvider (regions collapsed by default is evil).
+Assuming I don't need to touch PaymentProvider, will see if I have time.
+
 #### How to implement BillingService?
 
 Questions:
@@ -119,4 +122,5 @@ Questions:
 These parts are missing from the implementation and might be necessary depending on requirements:
 - Authentication and authorisation
 - Metrics
+- PaymentProvider implementation
 - Invoice datetime
