@@ -110,9 +110,13 @@ Questions:
   before the provided timestamp. This allows fine grained control of billing cycle without code changes.
 
   I assume we want to reprocess all old invoices even before the billing month, thus no start date.
+  
+  But, since currently invoices do not include any date, I omit this part of the functionality.
+  In the real system I'd argue it is necessary.
 
 ### Questions outside of scope of the task
 
 These parts are missing from the implementation and might be necessary depending on requirements:
 - Authentication and authorisation
 - Metrics
+- Invoice datetime
