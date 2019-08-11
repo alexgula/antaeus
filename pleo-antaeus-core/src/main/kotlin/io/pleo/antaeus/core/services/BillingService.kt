@@ -1,6 +1,7 @@
 package io.pleo.antaeus.core.services
 
 import io.pleo.antaeus.core.external.PaymentProvider
+import io.pleo.antaeus.models.InvoiceStatus
 
 class BillingService(
         private val paymentProvider: PaymentProvider,
@@ -13,6 +14,7 @@ class BillingService(
      */
     fun chargeAll(): Boolean {
         return invoiceService.fetchAll()
+                .filter { it.status == InvoiceStatus.PENDING }
                 .map { paymentProvider.charge(it) }
                 .all { it }
     }

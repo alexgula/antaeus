@@ -2,6 +2,7 @@ package io.pleo.antaeus.core.services
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import io.pleo.antaeus.core.external.PaymentProvider
 import io.pleo.antaeus.models.Currency
 import io.pleo.antaeus.models.Invoice
@@ -49,5 +50,28 @@ class BillingServiceTest {
         Assertions.assertEquals(false, result)
     }
 
-    private fun invoice() = Invoice(0, 0, Money(BigDecimal.valueOf(0), Currency.EUR), InvoiceStatus.PAID)
+    @Test
+    fun `performs no payment if no invoices`() {
+        every { invoiceService.fetchAll() } returns listOf()
+        billingService.chargeAll()
+        verify(exactly = 0) { paymentProvider.charge(any()) }
+    }
+
+    @Test
+    fun `performs no payment if no pending invoices`() {
+        every { invoiceService.fetchAll() } returns listOf(invoice(InvoiceStatus.PAID), invoice(InvoiceStatus.PAID))
+        billingService.chargeAll()
+        verify(exactly = 0) { paymentProvider.charge(any()) }
+    }
+
+    @Test
+    fun `performs payment only for pending invoices`() {
+        every { paymentProvider.charge(any()) } returns true
+        every { invoiceService.fetchAll() } returns listOf(invoice(InvoiceStatus.PENDING), invoice(InvoiceStatus.PAID))
+        billingService.chargeAll()
+        verify(exactly = 1) { paymentProvider.charge(any()) }
+    }
+
+    private fun invoice(status: InvoiceStatus = InvoiceStatus.PENDING) =
+            Invoice(0, 0, Money(BigDecimal.valueOf(0), Currency.EUR), status)
 }
