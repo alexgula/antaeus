@@ -5,5 +5,7 @@ import io.pleo.antaeus.core.external.PaymentProvider
 class BillingService(
     private val paymentProvider: PaymentProvider
 ) {
-   // TODO - Add code e.g. here
+    fun chargeAll(): Boolean {
+        return true
+    }
 }
