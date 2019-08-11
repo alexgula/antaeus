@@ -8,10 +8,7 @@
 package io.pleo.antaeus.data
 
 import io.pleo.antaeus.models.*
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class AntaeusDal(private val db: Database) {
@@ -38,7 +35,7 @@ class AntaeusDal(private val db: Database) {
     fun fetchInvoices(invoiceStatus: InvoiceStatus): List<Invoice> {
         return transaction(db) {
             InvoiceTable
-                .select { InvoiceTable.status.eq(invoiceStatus.toString()) }
+                .select { InvoiceTable.status eq invoiceStatus.toString() }
                 .map { it.toInvoice() }
         }
     }
@@ -56,6 +53,19 @@ class AntaeusDal(private val db: Database) {
         }
 
         return fetchInvoice(id!!)
+    }
+
+    fun updateInvoice(invoice: Invoice): Int {
+        return transaction(db) {
+            // Update the invoice
+            InvoiceTable
+                .update({InvoiceTable.id eq invoice.id}) {
+                    it[value] = invoice.amount.value
+                    it[currency] = invoice.amount.toString()
+                    it[status] = invoice.status.toString()
+                    it[customerId] = invoice.customerId
+                }
+        }
     }
 
     fun fetchCustomer(id: Int): Customer? {
