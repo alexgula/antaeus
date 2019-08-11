@@ -21,7 +21,7 @@ class BillingServiceTest {
 
     @Test
     fun `returns true if no invoices`() {
-        every { invoiceService.fetchAll() } returns listOf()
+        every { invoiceService.fetchAll(any()) } returns listOf()
         val result = billingService.chargeAll()
         Assertions.assertEquals(true, result)
     }
@@ -29,7 +29,7 @@ class BillingServiceTest {
     @Test
     fun `returns true if payment provider is succeeding`() {
         every { paymentProvider.charge(any()) } returns true
-        every { invoiceService.fetchAll() } returns listOf(invoice())
+        every { invoiceService.fetchAll(any()) } returns listOf(invoice())
         val result = billingService.chargeAll()
         Assertions.assertEquals(true, result)
     }
@@ -37,7 +37,7 @@ class BillingServiceTest {
     @Test
     fun `returns false if payment provider is failing`() {
         every { paymentProvider.charge(any()) } returns false
-        every { invoiceService.fetchAll() } returns listOf(invoice())
+        every { invoiceService.fetchAll(any()) } returns listOf(invoice())
         val result = billingService.chargeAll()
         Assertions.assertEquals(false, result)
     }
@@ -45,21 +45,21 @@ class BillingServiceTest {
     @Test
     fun `returns false if payment provider is failing sometimes`() {
         every { paymentProvider.charge(any()) } returns true andThen false
-        every { invoiceService.fetchAll() } returns listOf(invoice(), invoice())
+        every { invoiceService.fetchAll(any()) } returns listOf(invoice(), invoice())
         val result = billingService.chargeAll()
         Assertions.assertEquals(false, result)
     }
 
     @Test
-    fun `performs no payment if no invoices`() {
-        every { invoiceService.fetchAll() } returns listOf()
+    fun `reads pending invoices`() {
+        every { invoiceService.fetchAll(any()) } returns listOf()
         billingService.chargeAll()
-        verify(exactly = 0) { paymentProvider.charge(any()) }
+        verify(exactly = 1) { invoiceService.fetchAll(eq(InvoiceStatus.PENDING)) }
     }
 
     @Test
-    fun `performs no payment if no pending invoices`() {
-        every { invoiceService.fetchAll() } returns listOf(invoice(InvoiceStatus.PAID), invoice(InvoiceStatus.PAID))
+    fun `performs no payment if no invoices`() {
+        every { invoiceService.fetchAll(any()) } returns listOf()
         billingService.chargeAll()
         verify(exactly = 0) { paymentProvider.charge(any()) }
     }
@@ -67,11 +67,11 @@ class BillingServiceTest {
     @Test
     fun `performs payment only for pending invoices`() {
         every { paymentProvider.charge(any()) } returns true
-        every { invoiceService.fetchAll() } returns listOf(invoice(InvoiceStatus.PENDING), invoice(InvoiceStatus.PAID))
+        every { invoiceService.fetchAll(any()) } returns listOf(invoice())
         billingService.chargeAll()
         verify(exactly = 1) { paymentProvider.charge(any()) }
     }
 
-    private fun invoice(status: InvoiceStatus = InvoiceStatus.PENDING) =
-            Invoice(0, 0, Money(BigDecimal.valueOf(0), Currency.EUR), status)
+    private fun invoice() =
+            Invoice(0, 0, Money(BigDecimal.valueOf(0), Currency.EUR), InvoiceStatus.PENDING)
 }
