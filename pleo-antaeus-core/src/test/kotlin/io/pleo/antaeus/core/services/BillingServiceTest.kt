@@ -7,15 +7,21 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class BillingServiceTest {
-    private val paymentProvider = mockk<PaymentProvider> {
-        every { charge(any()) } returns true
-    }
+    private val paymentProvider = mockk<PaymentProvider>()
 
     private val billingService = BillingService(paymentProvider = paymentProvider)
 
     @Test
     fun `returns true if payment provider is succeeding`() {
+        every { paymentProvider.charge(any()) } returns true
         val result = billingService.chargeAll()
         Assertions.assertEquals(true, result)
+    }
+
+    @Test
+    fun `returns false if payment provider is failing`() {
+        every { paymentProvider.charge(any()) } returns false
+        val result = billingService.chargeAll()
+        Assertions.assertEquals(false, result)
     }
 }
