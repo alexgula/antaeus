@@ -104,6 +104,7 @@ Questions:
   We can mark as Done only invoices that were successfully processed, but what about scheduler?
 - Do we need to reschedule payments earlier than in the next month (probably yes) if there were errors?
   One option is to return _false_ from BillingService when there is at least one pending invoice.
+  Another is to return number of _pending_ invoices, i.e. invoices that we failed to process in this cycle.
 - Since requirements say _"schedule payment of those invoices on the first of the month"_,
   I assume we need to process only payments for the previous month(s), thus, if we want to reprocess
   invoices on 2nd or 15th of a month (due to any failure), we still need to process only invoices from previous month(s).

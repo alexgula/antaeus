@@ -10,11 +10,11 @@ class BillingService(
     /**
      * Charges all available invoices
      *
-     * @return true if there are no pending invoices left, false otherwise
+     * @return number of pending invoices left
      */
-    fun chargeAll(): Boolean {
+    fun chargeAll(): Int {
         return invoiceService.fetchAll(InvoiceStatus.PENDING)
                 .map { paymentProvider.charge(it) }
-                .all { it }
+                .count { !it }
     }
 }

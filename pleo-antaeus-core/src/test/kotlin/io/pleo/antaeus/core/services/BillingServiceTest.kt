@@ -20,34 +20,34 @@ class BillingServiceTest {
     private val billingService = BillingService(paymentProvider = paymentProvider, invoiceService = invoiceService)
 
     @Test
-    fun `returns true if no invoices`() {
+    fun `returns zero if no invoices`() {
         every { invoiceService.fetchAll(any()) } returns listOf()
         val result = billingService.chargeAll()
-        Assertions.assertEquals(true, result)
+        Assertions.assertEquals(0, result)
     }
 
     @Test
-    fun `returns true if payment provider is succeeding`() {
+    fun `returns zero if payment provider is succeeding`() {
         every { paymentProvider.charge(any()) } returns true
         every { invoiceService.fetchAll(any()) } returns listOf(invoice())
         val result = billingService.chargeAll()
-        Assertions.assertEquals(true, result)
+        Assertions.assertEquals(0, result)
     }
 
     @Test
-    fun `returns false if payment provider is failing`() {
+    fun `returns non-zero if payment provider is failing`() {
         every { paymentProvider.charge(any()) } returns false
         every { invoiceService.fetchAll(any()) } returns listOf(invoice())
         val result = billingService.chargeAll()
-        Assertions.assertEquals(false, result)
+        Assertions.assertEquals(1, result)
     }
 
     @Test
-    fun `returns false if payment provider is failing sometimes`() {
+    fun `returns non-zero if payment provider is failing sometimes`() {
         every { paymentProvider.charge(any()) } returns true andThen false
         every { invoiceService.fetchAll(any()) } returns listOf(invoice(), invoice())
         val result = billingService.chargeAll()
-        Assertions.assertEquals(false, result)
+        Assertions.assertEquals(1, result)
     }
 
     @Test
